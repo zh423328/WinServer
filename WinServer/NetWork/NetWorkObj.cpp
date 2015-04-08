@@ -1,0 +1,24 @@
+#include "Session.h"
+#include "NetWorkObj.h"
+
+//
+//bool INetWorkObj::SendMsg( stPackHeader *pHeader,xe_uint8 *pMsg,xe_uint16 nLen )
+//{
+//	if (m_pSession && m_pSession->IsLimit() == false)
+//		return m_pSession->SendMsg(pHeader,pMsg,nLen);
+//
+//	return false;
+//}
+//
+//INetWorkObj::INetWorkObj()
+//{
+//	m_pSession = NULL;
+//}
+//
+//INetWorkObj::~INetWorkObj()
+//{
+//	if (m_pSession)
+//	{
+//		m_pSession->UnBindNetWork();
+//	}
+//}
