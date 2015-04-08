@@ -58,5 +58,3 @@ char * xe_strchr(const char* src,int ch)
 }
 
 #endif
-
-
