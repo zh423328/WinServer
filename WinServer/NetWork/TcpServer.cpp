@@ -6,6 +6,8 @@
 #include "MsWinsockUtil.h"
 #include "SendBuffer.h"
 #include "RecvBuffer.h"
+#include "Acceptor.h"
+#include "Log.h"
 
 
 DWORD WINAPI cIocpServer::_WorkerThread( LPVOID lpParam )
@@ -61,10 +63,10 @@ DWORD WINAPI cIocpServer::_WorkerThread( LPVOID lpParam )
 				{
 					switch(pIoContext->dwOperator)
 					{
-					case IOCP_REQUEST_ACCEPT:
-						//处理accept
-						pServer->_DoAccpet(pSession,pIoContext,dwBytes);
-						break;
+					//case IOCP_REQUEST_ACCEPT:
+					//	//处理accept
+					//	pServer->_DoAccpet(pSession,pIoContext,dwBytes);
+					//	break;
 					case IOCP_REQUEST_RECV:
 						//处理read
 						pServer->_DoRecv(pSession,pIoContext,dwBytes);
@@ -128,6 +130,8 @@ cIocpServer::cIocpServer()
 
 	m_pConnector = new CConnector(this);
 
+	m_pAcceptor = new CAcceptor(this);
+
 	m_bRunning = false;
 }
 
@@ -139,6 +143,8 @@ cIocpServer::~cIocpServer()
 	SAFE_DELETE(m_pActiveSessionList);
 	SAFE_DELETE(m_pTempSessionList);
 	SAFE_DELETE(m_pTempSessionList);
+	SAFE_DELETE(m_pAcceptor);
+	SAFE_DELETE(m_pConnector);
 }
 
 
@@ -155,7 +161,8 @@ void cIocpServer::_ShowMessage( char*szFormat,... )
 	va_end(ap);
 
 	//处理输出消息
-	printf("%s",szText);		//暂时这样处理
+	//printf("%s",szText);		//暂时这样处理
+	sLog.OutPutStr(szText);
 }
 
 //====================================================================================
@@ -221,58 +228,13 @@ bool cIocpServer::_InitializeIOCP()
 //初始化服务器socket
 bool cIocpServer::_InitializeListenSocket()
 {
-	//服务器socket创建
-	SOCKADDR_IN serAddr;
-	serAddr.sin_family = AF_INET;
-	serAddr.sin_port = htons(m_nPort);
-	serAddr.sin_addr.s_addr = m_strIP.empty() ? htonl(INADDR_ANY) : inet_addr(m_strIP.c_str());
-
-
-	m_pListenSession = m_pSessionPool->Alloc();
-
-	if (m_pListenSession)
+	if (m_pAcceptor)
 	{
-		// 需要使用重叠IO，必须得使用WSASocket来建立Socket，才可以支持重叠IO操作
-		m_pListenSession->SetSocket(m_pListenSession->CreateSocket());
-		m_pListenSession->SetSockAddr(serAddr);
+		m_pAcceptor->Init(this,_GetNoOfProcessors()*2);
 
+		m_pAcceptor->StartListen((char*)m_strIP.c_str(),m_nPort);
 
-		if (m_pListenSession->GetSocket() == INVALID_SOCKET)
-		{
-			_ShowMessage("init listen socket error : %d!\n",WSAGetLastError());
-			return false;
-		}
-
-		//// 将Listen Socket绑定至完成端口中
-		if (CreateIoCompletionPort((HANDLE)m_pListenSession->GetSocket(),m_hIOCompletionPort,(xe_uint32)m_pListenSession,0) == NULL)
-		{
-			_ShowMessage("绑定 Listen Socket至完成端口失败！错误代码: %d\n", WSAGetLastError());  
-			SAFE_DELETE( m_pListenSession);
-			return false;
-		}
-
-		//bind
-		int ret = bind(m_pListenSession->GetSocket(), (struct sockaddr *) &serAddr, sizeof(serAddr));
-		if (ret == SOCKET_ERROR)
-		{
-			this->_ShowMessage("bind()函数执行错误.\n");  
-			SAFE_DELETE( m_pListenSession);
-			return false;
-		}
-
-
-		// 开始进行监听
-		if (SOCKET_ERROR == listen(m_pListenSession->GetSocket(),SOMAXCONN))
-		{
-			this->_ShowMessage("Listen()函数执行出现错误.\n");
-
-			SAFE_DELETE( m_pListenSession);
-			return false;
-		}
-
-		_SetSocketProp(m_pListenSession->GetSocket());
-
-		MsWinsockUtil::LoadExtensionFunction(m_pListenSession->GetSocket());
+		_SetSocketProp(m_pAcceptor->GetListenSocket());
 
 
 		// 为AcceptEx 准备参数，然后投递AcceptEx I/O请求，投递accept
@@ -352,7 +314,7 @@ bool cIocpServer::_PostAccept( CSession* pAcceptIoContext )
 {
 	if (pAcceptIoContext)
 	{
-		return pAcceptIoContext->PreAccept(m_pListenSession->GetSocket());
+		return pAcceptIoContext->PreAccept(m_pAcceptor->GetListenSocket());
 	}
 
 	return false;
@@ -608,8 +570,9 @@ bool cIocpServer::Start()
 
 void cIocpServer::Stop()
 {
-	if (m_pListenSession != NULL && m_pListenSession->GetSocket() != INVALID_SOCKET && m_pConnector)
+	if (m_pAcceptor != NULL && m_pAcceptor->GetListenSocket() != INVALID_SOCKET && m_pConnector)
 	{
+		m_pAcceptor->Shutdown();
 		m_pConnector->Stop();			//停止
 
 		//先等玩家目前的操作结束
@@ -809,11 +772,22 @@ void cIocpServer::KillDeadSession()
 		pSession = *iter2;
 		if (pSession)
 		{
+			//解绑
+			INetWorkObj *pNetWork = pSession->GetNetWorkObj();
+
+			pSession->UnBindNetWork();
+
+			//触发事件
 			//关闭socket和初始化
 			pSession->CloseScket();
 			pSession->Init();
 
 			m_pSessionPool->Free(pSession);
+
+			if (pNetWork)
+			{
+				pNetWork->OnDisconnect();		//触发事件
+			}
 		}
 	}
 

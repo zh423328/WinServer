@@ -8,6 +8,7 @@ class CSessionList;
 class CSessionPool;
 struct OVERLAPPEDEX;
 class CConnector;
+class CAcceptor;
 class cIocpServer
 {
 public:
@@ -41,7 +42,7 @@ public:
 	//放入主线程
 	virtual void Update();
 
-protected:
+
 
 	virtual bool StartConnect();		//启动连接
 
@@ -157,6 +158,7 @@ private:
 
 	CSessionList*				 m_pConnectSuccessList;			//连接成功的链表
 
+	CAcceptor*					 m_pAcceptor;
 	CConnector*					 m_pConnector;				//连接链表
 };
 #endif

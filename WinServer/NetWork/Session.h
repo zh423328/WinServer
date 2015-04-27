@@ -34,7 +34,7 @@ struct OVERLAPPEDEX : public OVERLAPPED
 class CRecvBuffer;
 class CSendBuffer;
 
-//连接类
+//连接类,
 class CSession
 {
 public:
@@ -106,6 +106,13 @@ public:
 	//在网关的唯一标示
 	inline	void	SetIndex(xe_uint32 nIndex)		{ m_nIndex = nIndex;}
 	inline	xe_uint32	GetIndex() { return m_nIndex;}	
+
+
+	//network
+	void	BindNetWork(INetWorkObj *pObj);
+	void	UnBindNetWork();
+
+	inline INetWorkObj* GetNetWorkObj(){ return m_pNetWork;}
 private:
 	xe_uint32	  m_nIndex;					//标记
 
@@ -125,5 +132,6 @@ private:
 	OVERLAPPEDEX			m_RecvIo;
 
 	bool					m_bLimit;			//服务器单方面限制,不接受任何消息，但是可以发送消息
+	INetWorkObj*			m_pNetWork;			//network
 };
 #endif

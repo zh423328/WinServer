@@ -36,9 +36,6 @@
     <ClInclude Include="lock.h">
       <Filter>NetWork</Filter>
     </ClInclude>
-    <ClInclude Include="NetWorkObj.h">
-      <Filter>NetWork</Filter>
-    </ClInclude>
     <ClInclude Include="Session.h">
       <Filter>NetWork</Filter>
     </ClInclude>
@@ -69,6 +66,15 @@
     <ClInclude Include="Connector.h">
       <Filter>NetWork</Filter>
     </ClInclude>
+    <ClInclude Include="Acceptor.h">
+      <Filter>NetWork</Filter>
+    </ClInclude>
+    <ClInclude Include="CPool.h">
+      <Filter>NetWork</Filter>
+    </ClInclude>
+    <ClInclude Include="NetWorkObj.h">
+      <Filter>NetWork</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="stdafx.cpp">
@@ -78,9 +84,6 @@
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="GlobalDefine.cpp">
-      <Filter>NetWork</Filter>
-    </ClCompile>
-    <ClCompile Include="NetWorkObj.cpp">
       <Filter>NetWork</Filter>
     </ClCompile>
     <ClCompile Include="Session.cpp">
@@ -102,6 +105,15 @@
       <Filter>NetWork</Filter>
     </ClCompile>
     <ClCompile Include="Connector.cpp">
+      <Filter>NetWork</Filter>
+    </ClCompile>
+    <ClCompile Include="Acceptor.cpp">
+      <Filter>NetWork</Filter>
+    </ClCompile>
+    <ClCompile Include="Log.cpp">
+      <Filter>NetWork</Filter>
+    </ClCompile>
+    <ClCompile Include="NetWorkObj.cpp">
       <Filter>NetWork</Filter>
     </ClCompile>
   </ItemGroup>

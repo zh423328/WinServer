@@ -88,8 +88,6 @@ bool CSession::PreAccept( SOCKET listenSocket )
 	m_AccpetIo.pSession = this;
 	m_AccpetIo.pBuf = NULL;
 
-	char szBuffer[MAX_BUFFER] = {0};
-	xe_uint16  nLen = MAX_BUFFER;
 
 	DWORD dwRecvBytes = 0;
 	//接收
@@ -169,6 +167,12 @@ bool CSession::PreSend()
 
 bool CSession::onAccept()
 {
+	//连接时接收消息
+	m_bRemove = false;
+
+	if (m_pNetWork)
+		m_pNetWork->OnAccept(GetIndex());
+
 	return true;
 }
 
@@ -207,10 +211,10 @@ bool CSession::ProcessRecvPack()
 
 
 		//处理包
-		//if (m_pNetWork)
-		//{
-		//	m_pNetWork->onRecv((xe_uint8*)pPacket->szBuf,pPacket->nLen);
-		//}
+		if (m_pNetWork)
+		{
+			m_pNetWork->OnRecv((xe_uint8*)pPacket->szBuf,pPacket->nLen);
+		}
 
 		SAFE_DELETE(pPacket);
 
@@ -228,7 +232,7 @@ bool CSession::SendMsg( stPackHeader *pHeader,xe_uint8 *pMsg,xe_uint16 nLen )
 
 	if (bRet == false)
 	{
-		OutputLog(log_error,"ERROR[CMDGROUP:%d][CMD:%d][SIZE:%d]",pHeader->bCmdGroup,pHeader->bCmd,nLen);
+		sLog.OutPutStr("ERROR[CMDGROUP:%d][CMD:%d][SIZE:%d]",pHeader->bCmdGroup,pHeader->bCmd,nLen);
 	}
 	return bRet;
 }
@@ -262,16 +266,35 @@ bool CSession::Disconnet( bool bDelete )
 bool CSession::onConnect( bool bSuccess )
 {
 	//连接成功做什么，失败了做什么？..
-	if (bSuccess)
-	{
-		
-	}
-	else
-	{
 
+	Init();
+
+	INetWorkObj *pNetworkObject = m_pNetWork;
+
+	if( !bSuccess )
+	{		
+		UnBindNetWork();		//失败
 	}
+	if (m_pNetWork)
+		pNetworkObject->OnConnect( bSuccess, GetIndex() );
 
 	return true;
+}
+
+void CSession::BindNetWork( INetWorkObj *pObj )
+{
+	m_pNetWork = pObj;
+	m_pNetWork->SetSession(this);
+}
+
+void CSession::UnBindNetWork()
+{
+	if (m_pNetWork == NULL)
+		return;
+
+	m_pNetWork->SetSession(NULL);
+
+	m_pNetWork = NULL;
 }
 
 

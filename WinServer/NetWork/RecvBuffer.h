@@ -14,12 +14,12 @@ class CRecvBuffer
 public:
 	CRecvBuffer()
 	{
-		InitializeCriticalSection(&m_cs);
+		//InitializeCriticalSection(&m_cs);
 	}
 	virtual ~CRecvBuffer()
 	{
 		Clear();
-		DeleteCriticalSection(&m_cs);
+		//DeleteCriticalSection(&m_cs);
 	}
 
 	//是否为空
@@ -52,7 +52,7 @@ public:
 
 
 
-		CSlock cs(&m_cs);
+		CAutoLock cs(&m_cs);
 		PackBuffetList.push_back(pPacket);
 
 		return true;
@@ -67,7 +67,7 @@ public:
 		if (IsEmpty())
 			return NULL;
 
-		CSlock cs(&m_cs);
+		CAutoLock cs(&m_cs);
 		stPackBuffer *pPacket = PackBuffetList.front();
 		PackBuffetList.pop_front();
 
@@ -95,7 +95,7 @@ public:
 
 		pPacket->nLen = pHeader->wSize + nHeadLen;					//包总长度
 
-		CSlock cs(&m_cs);
+		CAutoLock cs(&m_cs);
 		PackBuffetList.push_back(pPacket);
 
 		return true;
@@ -106,7 +106,7 @@ public:
 		if (pHeader == NULL)
 			return false;
 
-		CSlock cs(&m_cs);
+		CAutoLock cs(&m_cs);
 		PackBuffetList.push_back(pHeader);
 	}
 
@@ -126,7 +126,7 @@ public:
 private:
 	std::list<stPackBuffer*> PackBuffetList;
 	
-	CRITICAL_SECTION m_cs;
+	CLock m_cs;
 };
 
 #endif

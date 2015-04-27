@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <string>
 #include <stdlib.h>
+#include "lock.h"
 using namespace std;
 
 #pragma comment(lib,"ws2_32.lib")

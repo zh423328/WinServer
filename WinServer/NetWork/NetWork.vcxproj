@@ -75,7 +75,9 @@
     <None Include="ReadMe.txt" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Acceptor.h" />
     <ClInclude Include="Connector.h" />
+    <ClInclude Include="CPool.h" />
     <ClInclude Include="Gen.h" />
     <ClInclude Include="GlobalDefine.h" />
     <ClInclude Include="lock.h" />
@@ -93,9 +95,11 @@
     <ClInclude Include="TcpServer.h" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Acceptor.cpp" />
     <ClCompile Include="Connector.cpp" />
     <ClCompile Include="Gen.cpp" />
     <ClCompile Include="GlobalDefine.cpp" />
+    <ClCompile Include="Log.cpp" />
     <ClCompile Include="MsWinsockUtil.cpp" />
     <ClCompile Include="NetWork.cpp" />
     <ClCompile Include="NetWorkObj.cpp" />

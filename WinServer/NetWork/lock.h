@@ -1,24 +1,61 @@
+//////////////////////////////////////////////////////////////////////////
+//lock
+//////////////////////////////////////////////////////////////////////////
 #ifndef LOCK_H_
 #define LOCK_H_
-
-//////////////////////////////////////////////////////////////////////////
-//Áé»îËø£¬·ÀÖ¹ËÀËø
-//////////////////////////////////////////////////////////////////////////
-//Ëø
 #include "GlobalDefine.h"
-class CSlock
+
+//ÁÙ½çÇø
+class CLock
 {
 public:
-	CSlock(CRITICAL_SECTION * pCs)
+	CLock()
 	{
-		m_pCs = pCs;
-		EnterCriticalSection(m_pCs);
+		InitializeCriticalSection(&mCs);
 	}
-	~CSlock()
+	~CLock()
 	{
-		LeaveCriticalSection(m_pCs);
+		DeleteCriticalSection(&mCs);
+	}
+
+	//Ìí¼ÓËø
+	bool AttemptLock()
+	{
+		return TryEnterCriticalSection(&mCs) == TRUE ? true : false;
+	}
+
+	void Lock()
+	{
+		EnterCriticalSection(&mCs);
+	}
+
+	void UnLock()
+	{
+		LeaveCriticalSection(&mCs);
 	}
 private:
-	CRITICAL_SECTION * m_pCs;
+	CRITICAL_SECTION mCs;
 };
+
+
+class CAutoLock
+{
+public:
+	CAutoLock(CLock *pCs)
+	{
+		m_pCs = pCs;
+
+		if (m_pCs)
+			m_pCs->Lock();
+	}
+
+	~CAutoLock()
+	{
+		if (m_pCs)
+			m_pCs->UnLock();
+	}
+private:
+	CLock *m_pCs;
+};
+
 #endif

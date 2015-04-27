@@ -4,7 +4,7 @@
 CSessionList::CSessionList()
 {
 	//init
-	InitializeCriticalSection(&m_cs);
+	//InitializeCriticalSection(&m_cs);
 }
 
 CSessionList::~CSessionList()
@@ -12,12 +12,12 @@ CSessionList::~CSessionList()
 	Clear();
 
 	//É¾³ý
-	DeleteCriticalSection(&m_cs);
+	//DeleteCriticalSection(&m_cs);
 }
 
 void CSessionList::Clear()
 {
-	CSlock cs(&m_cs);
+	CAutoLock cs(&m_cs);
 
 	CSession *pSession = NULL;
 

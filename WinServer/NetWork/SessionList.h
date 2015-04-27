@@ -17,11 +17,11 @@ public:
 
 
 	//临界区
-	void Lock()			{EnterCriticalSection(&m_cs);}
-	void UnLock()		{LeaveCriticalSection(&m_cs);}
+	inline void Lock()			{m_cs.Lock();}
+	inline void UnLock()		{m_cs.UnLock();}
 
 private:
-	CRITICAL_SECTION m_cs;		//临界区
+	CLock m_cs;		//临界区
 };
 
 #endif
